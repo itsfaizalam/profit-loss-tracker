@@ -18,6 +18,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/trades', require('./routes/tradeRoutes'));
+app.use('/api/stocks', require('./routes/stockRoutes'));
 
 app.get('/', (req, res) => {
     res.send('Trading Profit & Loss API is running...');

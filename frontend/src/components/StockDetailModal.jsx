@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { X, TrendingUp, TrendingDown, IndianRupee, Activity } from 'lucide-react';
-import { CumulativeProfitChart } from './Charts';
+import { StockPriceChart } from './Charts';
 
 const StatCard = ({ title, value, prefix = '', suffix = '', icon: Icon, colorClass }) => (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 flex items-center shadow-sm border border-gray-100 dark:border-gray-700">
@@ -25,23 +25,25 @@ const StockDetailModal = ({ isOpen, onClose, stockName, trades }) => {
         const stockTrades = trades.filter(trade => trade.stockName.toLowerCase() === stockName.toLowerCase());
 
         // Sort chronologically by sellDate
-        const sortedTrades = stockTrades.sort((a, b) => new Date(a.sellDate) - new Date(b.sellDate));
+        const sortedTrades = [...stockTrades].sort((a, b) => new Date(a.sellDate) - new Date(b.sellDate));
 
         let totalProfit = 0;
         let totalBrokerage = 0;
         let totalQuantity = 0;
-        let cumProfit = 0;
 
-        const dataForChart = sortedTrades.map((trade) => {
-            cumProfit += trade.profitLoss;
+        const dataForChart = sortedTrades.map((trade, index) => {
             totalProfit += trade.profitLoss;
             totalBrokerage += trade.brokerage || 0;
             totalQuantity += trade.quantity;
 
+            // We use the timestamp for the chronological X-Axis. 
+            // A slight artificial offset ensures stable sorting rendering for same-day trades.
+            const timestamp = new Date(trade.sellDate).getTime() + index;
+
             return {
-                date: new Date(trade.sellDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
-                cumulativeProfit: cumProfit,
-                profitLoss: trade.profitLoss
+                timestamp,
+                price: trade.sellPrice,
+                fullDate: new Date(trade.sellDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
             };
         });
 
@@ -117,7 +119,7 @@ const StockDetailModal = ({ isOpen, onClose, stockName, trades }) => {
                                 {/* Chart Row */}
                                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stock Performance Timeline</h2>
-                                    <CumulativeProfitChart data={chartData} />
+                                    <StockPriceChart data={chartData} />
                                 </div>
                             </div>
                         ) : (

@@ -16,7 +16,8 @@ const tradeSchema = Joi.object({
     updatedAt: Joi.date().optional(),
     __v: Joi.number().optional(),
     profitLoss: Joi.number().optional(),
-    holdingDays: Joi.number().optional()
+    holdingDays: Joi.number().optional(),
+    isDeleted: Joi.boolean().optional()
 });
 
 // @desc    Create a trade
@@ -67,7 +68,7 @@ const createTrade = async (req, res) => {
 const getTrades = async (req, res) => {
     try {
         // Query formulation based on query params (filters)
-        const query = { userId: req.user._id };
+        const query = { userId: req.user._id, isDeleted: { $ne: true } };
 
         if (req.query.stockName) {
             query.stockName = { $regex: req.query.stockName, $options: 'i' };
@@ -146,7 +147,7 @@ const updateTrade = async (req, res) => {
     }
 };
 
-// @desc    Delete a trade
+// @desc    Soft delete a trade (move to bin)
 // @route   DELETE /api/trades/:id
 // @access  Private
 const deleteTrade = async (req, res) => {
@@ -161,10 +162,60 @@ const deleteTrade = async (req, res) => {
             return res.status(401).json({ message: 'Not authorized' });
         }
 
-        await Trade.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Trade removed' });
+        trade.isDeleted = true;
+        await trade.save();
+
+        res.json({ message: 'Trade moved to bin' });
     } catch (err) {
         console.error('Delete Trade Error:', err);
+        res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
+// @desc    Get all trades in the bin for a user
+// @route   GET /api/trades/bin
+// @access  Private
+const getBinTrades = async (req, res) => {
+    try {
+        const trades = await Trade.find({ userId: req.user._id, isDeleted: true }).sort({ updatedAt: -1 });
+        res.json(trades);
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
+// @desc    Restore a soft-deleted trade
+// @route   PUT /api/trades/:id/restore
+// @access  Private
+const restoreTrade = async (req, res) => {
+    try {
+        const trade = await Trade.findById(req.params.id);
+
+        if (!trade) return res.status(404).json({ message: 'Trade not found' });
+        if (trade.userId.toString() !== req.user._id.toString()) return res.status(401).json({ message: 'Not authorized' });
+
+        trade.isDeleted = false;
+        await trade.save();
+
+        res.json({ message: 'Trade restored', trade });
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
+// @desc    Permanently delete a trade
+// @route   DELETE /api/trades/:id/hard
+// @access  Private
+const hardDeleteTrade = async (req, res) => {
+    try {
+        const trade = await Trade.findById(req.params.id);
+
+        if (!trade) return res.status(404).json({ message: 'Trade not found' });
+        if (trade.userId.toString() !== req.user._id.toString()) return res.status(401).json({ message: 'Not authorized' });
+
+        await Trade.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Trade permanently removed' });
+    } catch (err) {
         res.status(500).json({ message: 'Server Error', error: err.message });
     }
 };
@@ -174,7 +225,7 @@ const deleteTrade = async (req, res) => {
 // @access  Private
 const getTradeReport = async (req, res) => {
     try {
-        const trades = await Trade.find({ userId: req.user._id });
+        const trades = await Trade.find({ userId: req.user._id, isDeleted: { $ne: true } });
 
         let totalInvested = 0;
         let totalRealizedProfit = 0;
@@ -212,10 +263,75 @@ const getTradeReport = async (req, res) => {
     }
 };
 
+// @desc    Bulk soft delete trades (move to bin)
+// @route   PATCH /api/trades/bulk-soft-delete
+// @access  Private
+const bulkSoftDeleteTrades = async (req, res) => {
+    try {
+        const { tradeIds } = req.body;
+        if (!Array.isArray(tradeIds) || tradeIds.length === 0) {
+            return res.status(400).json({ message: 'No trade IDs provided' });
+        }
+
+        const result = await Trade.updateMany(
+            { _id: { $in: tradeIds }, userId: req.user._id },
+            { $set: { isDeleted: true } }
+        );
+
+        res.json({ message: `${result.modifiedCount} trades moved to bin` });
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
+// @desc    Bulk restore soft-deleted trades
+// @route   PATCH /api/trades/bulk-restore
+// @access  Private
+const bulkRestoreTrades = async (req, res) => {
+    try {
+        const { tradeIds } = req.body;
+        if (!Array.isArray(tradeIds) || tradeIds.length === 0) {
+            return res.status(400).json({ message: 'No trade IDs provided' });
+        }
+
+        const result = await Trade.updateMany(
+            { _id: { $in: tradeIds }, userId: req.user._id },
+            { $set: { isDeleted: false } }
+        );
+
+        res.json({ message: `${result.modifiedCount} trades restored` });
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
+// @desc    Bulk permanently delete trades
+// @route   DELETE /api/trades/bulk-delete
+// @access  Private
+const bulkHardDeleteTrades = async (req, res) => {
+    try {
+        const { tradeIds } = req.body;
+        if (!Array.isArray(tradeIds) || tradeIds.length === 0) {
+            return res.status(400).json({ message: 'No trade IDs provided' });
+        }
+
+        const result = await Trade.deleteMany({ _id: { $in: tradeIds }, userId: req.user._id });
+        res.json({ message: `${result.deletedCount} trades permanently deleted` });
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
 module.exports = {
     createTrade,
     getTrades,
     updateTrade,
     deleteTrade,
-    getTradeReport
+    getTradeReport,
+    getBinTrades,
+    restoreTrade,
+    hardDeleteTrade,
+    bulkSoftDeleteTrades,
+    bulkRestoreTrades,
+    bulkHardDeleteTrades
 };

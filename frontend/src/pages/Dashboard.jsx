@@ -22,14 +22,28 @@ const Dashboard = () => {
             setStats(statsRes.data);
 
             // Process trades for cumulative profit chart
-            const sortedTrades = tradesRes.data.sort((a, b) => new Date(a.sellDate) - new Date(b.sellDate));
+            const sortedTrades = [...tradesRes.data].sort((a, b) => new Date(a.sellDate) - new Date(b.sellDate));
+
+            // Group by date
+            const groupedByDate = {};
+            sortedTrades.forEach(trade => {
+                const dateKey = new Date(trade.sellDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                if (!groupedByDate[dateKey]) {
+                    groupedByDate[dateKey] = {
+                        date: dateKey,
+                        profitLoss: 0
+                    };
+                }
+                groupedByDate[dateKey].profitLoss += trade.profitLoss;
+            });
+
             let cumProfit = 0;
-            const chartData = sortedTrades.map(trade => {
-                cumProfit += trade.profitLoss;
+            const chartData = Object.values(groupedByDate).map(dayData => {
+                cumProfit += dayData.profitLoss;
                 return {
-                    date: new Date(trade.sellDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+                    date: dayData.date,
                     cumulativeProfit: cumProfit,
-                    profitLoss: trade.profitLoss
+                    profitLoss: dayData.profitLoss
                 };
             });
 
