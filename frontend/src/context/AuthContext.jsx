@@ -27,11 +27,16 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (name, email, password) => {
         const response = await api.post('/auth/register', { name, email, password });
-        if (response.data) {
-            localStorage.setItem('user', JSON.stringify(response.data));
-            setUser(response.data);
-        }
+        // Removed auto-login because the user must verify their email first
         return response.data;
+    };
+
+    const updateUser = (userData) => {
+        // Keeps token but updates the user profile data locally (like after changing avatar)
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        const updatedUser = { ...currentUser, ...userData };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
     };
 
     const logout = () => {
@@ -40,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, updateUser, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );
