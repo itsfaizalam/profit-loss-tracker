@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import API from '../api';
 import { AuthContext } from '../context/AuthContext';
 import { User, Lock, Save, AlertCircle, CheckCircle, Camera, Loader2 } from 'lucide-react';
 
@@ -54,9 +54,8 @@ const AccountSettings = () => {
             }
 
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-            const response = await axios.put(`${apiUrl}/users/profile`, formData, {
+            const response = await API.put(`/api/users/profile`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
@@ -89,9 +88,8 @@ const AccountSettings = () => {
 
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-            await axios.put(`${apiUrl}/users/password`, {
+            await API.put(`/api/users/password`, {
                 currentPassword,
                 newPassword
             }, {
@@ -123,8 +121,8 @@ const AccountSettings = () => {
                     <button
                         onClick={() => setActiveTab('profile')}
                         className={`flex-1 py-4 px-6 text-center font-medium flex items-center justify-center transition-colors ${activeTab === 'profile'
-                                ? 'bg-gray-50 dark:bg-gray-900/50 text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                            ? 'bg-gray-50 dark:bg-gray-900/50 text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                             }`}
                     >
                         <User className="w-4 h-4 mr-2" /> Profile Information
@@ -132,8 +130,8 @@ const AccountSettings = () => {
                     <button
                         onClick={() => setActiveTab('security')}
                         className={`flex-1 py-4 px-6 text-center font-medium flex items-center justify-center transition-colors ${activeTab === 'security'
-                                ? 'bg-gray-50 dark:bg-gray-900/50 text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                            ? 'bg-gray-50 dark:bg-gray-900/50 text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                             }`}
                     >
                         <Lock className="w-4 h-4 mr-2" /> Security & Password

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 const VerifyEmail = () => {
@@ -12,8 +12,7 @@ const VerifyEmail = () => {
         const verifyToken = async () => {
             try {
                 // Determine API URL based on environment since we are outside the standard API client context here sometimes
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const response = await axios.get(`${apiUrl}/auth/verify/${token}`);
+                const response = await API.get(`/api/auth/verify/${token}`);
 
                 setStatus('success');
                 setMessage(response.data.message);

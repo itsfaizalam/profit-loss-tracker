@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../api';
 import {
     Users, UserCheck, UserX, LineChart,
     ArrowUpRight, ArrowDownRight, Activity, TrendingUp, TrendingDown
@@ -18,9 +18,8 @@ const AdminDashboard = () => {
         const fetchDashboardStats = async () => {
             try {
                 const token = JSON.parse(localStorage.getItem('user'))?.token;
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-                const response = await axios.get(`${apiUrl}/admin/dashboard`, {
+                const response = await API.get(`/api/admin/dashboard`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -111,8 +110,8 @@ const AdminDashboard = () => {
                                     <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">System Net P&L</dt>
                                     <dd className="flex items-baseline">
                                         <div className={`text-2xl font-semibold ${(stats?.financials.totalProfit - stats?.financials.totalLoss) >= 0
-                                                ? 'text-emerald-600 dark:text-emerald-400'
-                                                : 'text-red-600 dark:text-red-400'
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-red-600 dark:text-red-400'
                                             }`}>
                                             {formatCurrency(stats?.financials.totalProfit - stats?.financials.totalLoss)}
                                         </div>

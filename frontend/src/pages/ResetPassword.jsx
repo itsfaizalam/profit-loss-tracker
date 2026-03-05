@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api';
 import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle } from 'lucide-react';
 
 const ResetPassword = () => {
@@ -27,8 +27,7 @@ const ResetPassword = () => {
         setLoading(true);
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.put(`${apiUrl}/auth/reset-password/${token}`, { password });
+            await API.put(`/api/auth/reset-password/${token}`, { password });
             setSuccess(true);
             setTimeout(() => navigate('/login'), 3000);
         } catch (err) {
@@ -110,8 +109,8 @@ const ResetPassword = () => {
                                     type={showPassword ? 'text' : 'password'}
                                     required
                                     className={`appearance-none rounded-lg relative block w-full px-3 py-2 border placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors ${confirmPassword && password !== confirmPassword
-                                            ? 'border-red-300 dark:border-red-500'
-                                            : 'border-gray-300 dark:border-gray-600'
+                                        ? 'border-red-300 dark:border-red-500'
+                                        : 'border-gray-300 dark:border-gray-600'
                                         }`}
                                     placeholder="Re-enter password"
                                     value={confirmPassword}
@@ -128,8 +127,8 @@ const ResetPassword = () => {
                                 <div className="flex gap-1">
                                     {[1, 2, 3, 4].map(i => (
                                         <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${password.length >= i * 3
-                                                ? i <= 2 ? 'bg-amber-400' : 'bg-emerald-400'
-                                                : 'bg-gray-200 dark:bg-gray-700'
+                                            ? i <= 2 ? 'bg-amber-400' : 'bg-emerald-400'
+                                            : 'bg-gray-200 dark:bg-gray-700'
                                             }`} />
                                     ))}
                                 </div>

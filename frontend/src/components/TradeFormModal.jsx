@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Search } from 'lucide-react';
-import api from '../services/api';
+import API from '../api';
 
 const TradeFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     const [formData, setFormData] = useState({
@@ -67,7 +67,7 @@ const TradeFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
         const timer = setTimeout(async () => {
             setIsLoadingStocks(true);
             try {
-                const res = await api.get(`/stocks/search?q=${searchQuery}`);
+                const res = await API.get(`/api/stocks/search?q=${searchQuery}`);
                 setSuggestions(res.data);
                 setIsDropdownOpen(res.data.length > 0);
                 setHighlightedIndex(-1);
@@ -200,8 +200,8 @@ const TradeFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                                             <div
                                                 key={stock._id}
                                                 className={`px-4 py-2 cursor-pointer transition-colors ${highlightedIndex === index
-                                                        ? 'bg-blue-50 dark:bg-blue-900/30'
-                                                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                    ? 'bg-blue-50 dark:bg-blue-900/30'
+                                                    : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                                                     }`}
                                                 onClick={() => handleSelectStock(stock)}
                                                 onMouseEnter={() => setHighlightedIndex(index)}

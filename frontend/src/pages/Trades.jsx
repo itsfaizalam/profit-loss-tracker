@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import API from '../api';
 import TradeFormModal from '../components/TradeFormModal';
 import StockDetailModal from '../components/StockDetailModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -29,14 +29,14 @@ const Trades = () => {
     const fetchTrades = async () => {
         setLoading(true);
         try {
-            let url = viewMode === 'bin' ? '/trades/bin?' : '/trades?';
+            let url = viewMode === 'bin' ? '/api/trades/bin?' : '/api/trades?';
             if (stockFilter) url += `stockName=${stockFilter}&`;
             if (typeFilter) url += `type=${typeFilter}&`;
             if (dateRange.start && dateRange.end) {
                 url += `startDate=${dateRange.start}&endDate=${dateRange.end}`;
             }
 
-            const res = await api.get(url);
+            const res = await API.get(url);
             setTrades(res.data);
         } catch (err) {
             console.error(err);
@@ -52,7 +52,7 @@ const Trades = () => {
 
     const handleCreateTrade = async (data) => {
         try {
-            await api.post('/trades', data);
+            await API.post('/api/trades', data);
             setModalOpen(false);
             fetchTrades();
         } catch (err) {
@@ -63,7 +63,7 @@ const Trades = () => {
 
     const handleUpdateTrade = async (data) => {
         try {
-            await api.put(`/trades/${data._id}`, data);
+            await API.put(`/api/trades/${data._id}`, data);
             setModalOpen(false);
             setEditingTrade(null);
             fetchTrades();
@@ -83,10 +83,10 @@ const Trades = () => {
         try {
             if (viewMode === 'active') {
                 // Soft delete
-                await api.delete(`/trades/${tradeToDelete}`);
+                await API.delete(`/api/trades/${tradeToDelete}`);
             } else {
                 // Hard delete
-                await api.delete(`/trades/${tradeToDelete}/hard`);
+                await API.delete(`/api/trades/${tradeToDelete}/hard`);
             }
             fetchTrades();
             setConfirmDeleteOpen(false);
@@ -101,7 +101,7 @@ const Trades = () => {
 
     const handleRestore = async (id) => {
         try {
-            await api.put(`/trades/${id}/restore`);
+            await API.put(`/api/trades/${id}/restore`);
             fetchTrades();
         } catch (err) {
             console.error(err);
@@ -127,11 +127,11 @@ const Trades = () => {
     const confirmBulkAction = async () => {
         try {
             if (bulkActionType === 'soft-delete') {
-                await api.post('/trades/bulk-soft-delete', { tradeIds: selectedTrades });
+                await API.post('/api/trades/bulk-soft-delete', { tradeIds: selectedTrades });
             } else if (bulkActionType === 'restore') {
-                await api.post('/trades/bulk-restore', { tradeIds: selectedTrades });
+                await API.post('/api/trades/bulk-restore', { tradeIds: selectedTrades });
             } else if (bulkActionType === 'hard-delete') {
-                await api.post('/trades/bulk-delete', { tradeIds: selectedTrades });
+                await API.post('/api/trades/bulk-delete', { tradeIds: selectedTrades });
             }
 
             setSelectedTrades([]);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api';
 import {
     ArrowLeft, User, Mail, Calendar, Activity,
     ShieldBan, ShieldCheck, Trash2, TrendingUp, TrendingDown,
@@ -24,9 +24,8 @@ const UserProfileAdmin = () => {
         try {
             setLoading(true);
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-            const response = await axios.get(`${apiUrl}/admin/users/${id}`, {
+            const response = await API.get(`/api/admin/users/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -76,8 +75,7 @@ const UserProfileAdmin = () => {
         if (!window.confirm("Are you sure you want to change this user's access status?")) return;
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.put(`${apiUrl}/admin/users/${id}/block`, {}, {
+            await API.put(`/api/admin/users/${id}/block`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchUserProfile(); // Refresh data
@@ -90,8 +88,7 @@ const UserProfileAdmin = () => {
         if (!window.confirm("WARNING: This will permanently delete the user AND all of their trades. This cannot be undone. Proceed?")) return;
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.delete(`${apiUrl}/admin/users/${id}`, {
+            await API.delete(`/api/admin/users/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/admin/users'); // Go back to list after deletion
@@ -104,8 +101,7 @@ const UserProfileAdmin = () => {
         if (!window.confirm('Move this trade to the bin?')) return;
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.delete(`${apiUrl}/admin/trades/${tradeId}/soft`, {
+            await API.delete(`/api/admin/trades/${tradeId}/soft`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchUserProfile();
@@ -118,8 +114,7 @@ const UserProfileAdmin = () => {
         if (!window.confirm('Restore this trade? It will be active again.')) return;
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.put(`${apiUrl}/admin/trades/${tradeId}/restore`, {}, {
+            await API.put(`/api/admin/trades/${tradeId}/restore`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchUserProfile();
@@ -132,8 +127,7 @@ const UserProfileAdmin = () => {
         if (!window.confirm('Permanently delete this trade? This cannot be undone.')) return;
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.delete(`${apiUrl}/admin/trades/${tradeId}/hard`, {
+            await API.delete(`/api/admin/trades/${tradeId}/hard`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchUserProfile();

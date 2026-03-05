@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import API from '../api';
 import TopStats from '../components/TopStats';
 import { CumulativeProfitChart, WinLossPieChart } from '../components/Charts';
 import { Loader2, Plus } from 'lucide-react';
@@ -15,8 +15,8 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
         try {
             const [statsRes, tradesRes] = await Promise.all([
-                api.get('/trades/report'),
-                api.get('/trades')
+                API.get('/api/trades/report'),
+                API.get('/api/trades')
             ]);
 
             setStats(statsRes.data);
@@ -61,7 +61,7 @@ const Dashboard = () => {
 
     const handleCreateTrade = async (data) => {
         try {
-            await api.post('/trades', data);
+            await API.post('/api/trades', data);
             setModalOpen(false);
             setLoading(true);
             fetchDashboardData();

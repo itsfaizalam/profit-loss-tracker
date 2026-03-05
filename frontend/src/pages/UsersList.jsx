@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../api';
 import { Link } from 'react-router-dom';
 import {
     Users, ShieldBan, ShieldCheck, Trash2, Edit3,
@@ -23,9 +23,8 @@ const EditUserModal = ({ user, onClose, onSaved }) => {
 
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-            await axios.put(`${apiUrl}/admin/users/${user._id}`, { name, email, isBlocked }, {
+            await API.put(`/api/admin/users/${user._id}`, { name, email, isBlocked }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -111,8 +110,8 @@ const EditUserModal = ({ user, onClose, onSaved }) => {
                                 type="button"
                                 onClick={() => setIsBlocked(false)}
                                 className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${!isBlocked
-                                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300'
-                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300'
+                                    : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 ✓ Active
@@ -121,8 +120,8 @@ const EditUserModal = ({ user, onClose, onSaved }) => {
                                 type="button"
                                 onClick={() => setIsBlocked(true)}
                                 className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${isBlocked
-                                        ? 'bg-red-50 border-red-400 text-red-700 dark:bg-red-900/30 dark:border-red-600 dark:text-red-300'
-                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    ? 'bg-red-50 border-red-400 text-red-700 dark:bg-red-900/30 dark:border-red-600 dark:text-red-300'
+                                    : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 ✕ Blocked
@@ -165,9 +164,8 @@ const UsersList = () => {
         try {
             setLoading(true);
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-            const response = await axios.get(`${apiUrl}/admin/users`, {
+            const response = await API.get(`/api/admin/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -188,9 +186,8 @@ const UsersList = () => {
 
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-            await axios.put(`${apiUrl}/admin/users/${userId}/block`, {}, {
+            await API.put(`/api/admin/users/${userId}/block`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -205,9 +202,8 @@ const UsersList = () => {
 
         try {
             const token = JSON.parse(localStorage.getItem('user'))?.token;
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-            await axios.delete(`${apiUrl}/admin/users/${userId}`, {
+            await API.delete(`/api/admin/users/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -363,8 +359,8 @@ const UsersList = () => {
                                                             <button
                                                                 onClick={() => toggleBlockStatus(user._id)}
                                                                 className={`p-1.5 rounded-md transition-colors ${user.isBlocked
-                                                                        ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
-                                                                        : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                                                                    ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                                                                    : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
                                                                     }`}
                                                                 title={user.isBlocked ? "Unblock User" : "Block User"}
                                                             >
