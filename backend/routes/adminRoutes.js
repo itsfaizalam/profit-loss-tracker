@@ -7,6 +7,7 @@ const {
     deleteUser,
     getUserProfile,
     updateUser,
+    verifyUserEmail,
     softDeleteUserTrade,
     hardDeleteUserTrade,
     restoreUserTrade
@@ -21,6 +22,7 @@ router.route('/dashboard').get(getDashboardStats);
 router.route('/users').get(getUsers);
 router.route('/users/:id').get(getUserProfile).put(updateUser).delete(deleteUser);
 router.route('/users/:id/block').put(toggleBlockUser);
+router.route('/users/:id/verify').put(verifyUserEmail);
 
 // Admin Trade routes
 router.route('/trades/:id/soft').delete(softDeleteUserTrade);

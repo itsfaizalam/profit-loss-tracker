@@ -265,6 +265,31 @@ const updateUser = async (req, res) => {
     }
 };
 
+// @desc    Manually verify a user's email
+// @route   PUT /api/admin/users/:id/verify
+// @access  Private/Admin
+const verifyUserEmail = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ message: 'User is already verified' });
+        }
+
+        // Mark as verified and clear token
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'User email manually verified successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error manually verifying user', error: err.message });
+    }
+};
+
 // @desc    Restore an arbitrary soft-deleted user trade
 // @route   PUT /api/admin/trades/:id/restore
 // @access  Private/Admin
@@ -325,6 +350,7 @@ module.exports = {
     deleteUser,
     getUserProfile,
     updateUser,
+    verifyUserEmail,
     softDeleteUserTrade,
     hardDeleteUserTrade,
     restoreUserTrade

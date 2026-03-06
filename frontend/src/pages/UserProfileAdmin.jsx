@@ -4,7 +4,7 @@ import API from '../api';
 import {
     ArrowLeft, User, Mail, Calendar, Activity,
     ShieldBan, ShieldCheck, Trash2, TrendingUp, TrendingDown,
-    AlertCircle, CheckCircle, XCircle, Archive, ArchiveRestore, RefreshCw
+    AlertCircle, CheckCircle, XCircle, Archive, ArchiveRestore, RefreshCw, MailCheck
 } from 'lucide-react';
 import { CumulativeProfitChart, WinLossPieChart } from '../components/Charts';
 import StockDetailModal from '../components/StockDetailModal';
@@ -94,6 +94,19 @@ const UserProfileAdmin = () => {
             navigate('/admin/users'); // Go back to list after deletion
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to delete user');
+        }
+    };
+
+    const handleVerifyUser = async () => {
+        if (!window.confirm("Are you sure you want to manually verify this user's email?")) return;
+        try {
+            const token = JSON.parse(localStorage.getItem('user'))?.token;
+            await API.put(`/api/admin/users/${id}/verify`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchUserProfile();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to verify user email');
         }
     };
 
@@ -192,7 +205,15 @@ const UserProfileAdmin = () => {
 
                     {/* Admin Actions */}
                     {user.role !== 'admin' && (
-                        <div className="mt-3 sm:mt-0 flex gap-3">
+                        <div className="mt-3 sm:mt-0 flex flex-wrap justify-end gap-3">
+                            {!user.isVerified && (
+                                <button
+                                    onClick={handleVerifyUser}
+                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-emerald-700 bg-emerald-100 hover:bg-emerald-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors dark:bg-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60 dark:ring-offset-gray-900"
+                                >
+                                    <MailCheck className="w-4 h-4 mr-1.5" /> Verify Email
+                                </button>
+                            )}
                             <button
                                 onClick={handleToggleBlock}
                                 className={`inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${user.isBlocked

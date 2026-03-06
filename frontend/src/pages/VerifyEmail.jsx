@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../api';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
@@ -7,8 +7,12 @@ const VerifyEmail = () => {
     const { token } = useParams();
     const [status, setStatus] = useState('verifying'); // 'verifying', 'success', 'error'
     const [message, setMessage] = useState('');
+    const hasFetched = useRef(false);
 
     useEffect(() => {
+        if (hasFetched.current) return;
+        hasFetched.current = true;
+
         const verifyToken = async () => {
             try {
                 // Determine API URL based on environment since we are outside the standard API client context here sometimes

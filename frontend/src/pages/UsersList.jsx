@@ -3,7 +3,7 @@ import API from '../api';
 import { Link } from 'react-router-dom';
 import {
     Users, ShieldBan, ShieldCheck, Trash2, Edit3,
-    Search, AlertCircle, X, Save, Loader2, CheckCircle
+    Search, AlertCircle, X, Save, Loader2, CheckCircle, MailCheck
 } from 'lucide-react';
 
 // ── Edit User Modal ──────────────────────────────────────────────────────────
@@ -213,6 +213,22 @@ const UsersList = () => {
         }
     };
 
+    const handleVerifyUser = async (userId) => {
+        if (!window.confirm("Are you sure you want to manually verify this user's email?")) return;
+
+        try {
+            const token = JSON.parse(localStorage.getItem('user'))?.token;
+
+            await API.put(`/api/admin/users/${userId}/verify`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            fetchUsers();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to verify user email');
+        }
+    };
+
     const formatCurrency = (amount) => {
         if (amount === undefined || amount === null) return '₹0';
         return new Intl.NumberFormat('en-IN', {
@@ -366,6 +382,17 @@ const UsersList = () => {
                                                             >
                                                                 {user.isBlocked ? <ShieldCheck className="w-4 h-4" /> : <ShieldBan className="w-4 h-4" />}
                                                             </button>
+
+                                                            {/* Verify Email */}
+                                                            {!user.isVerified && (
+                                                                <button
+                                                                    onClick={() => handleVerifyUser(user._id)}
+                                                                    className="p-1.5 rounded-md text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                                                                    title="Verify User Email"
+                                                                >
+                                                                    <MailCheck className="w-4 h-4" />
+                                                                </button>
+                                                            )}
 
                                                             {/* Delete */}
                                                             <button
